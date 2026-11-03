@@ -41,16 +41,22 @@ ___
 ```
 Пример парсинга командной строки с заданными параметрами
 ```cpp
+std::vector<std::string> args = { /* ... */};
+
 cli::Option::Name use_tls_option('t', "tls");
 cli::Option::Name port_option('p', "port");
 cli::Option::Name resources_option('r', "resources");
 
+std::vector<cli::Command> presets = {
+    { "start", {
+        {use_tls_option, cli::Option::Type::FLAG},
+        {port_option,  cli::Option::Type::ONE_ARGUMENT},
+        {resources_option, cli::Option::Type::MORE_ARGUMENTS}
+    }}
+};
+
 cli::Options cli_options;
-bool res = cli_options.parse(argc, argv, {
-  {use_tls_option,   cli::Option::Type::FLAG},
-  {port_option,      cli::Option::Type::ONE_ARGUMENT},
-  {resources_option, cli::Option::Type::MORE_ARGUMENT}
-});
+bool res = cli_options.parse(args, presets);
 if (res == false)
 {
   std::cout << "Command line reading error!" << std::endl;
@@ -59,7 +65,7 @@ if (res == false)
 ```
 Пример использования ключа-флага
 ```cpp
-bool flag = cli_options.has(use_tls_option);
+bool flag = cli_options.hasArgument(use_tls_option);
 if (flag)
 {
   //some code

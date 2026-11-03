@@ -21,8 +21,8 @@ option(BUILD_SHARED "Build shared library"       OFF)
 
 set(SOURCE_FILES
     src/Option.cpp
-    src/Tools.cpp
-    src/Options.cpp)
+    src/Options.cpp
+    src/Tools.cpp)
 
 if(BUILD_SHARED)
 	add_library(${PROJECT_NAME} SHARED)
