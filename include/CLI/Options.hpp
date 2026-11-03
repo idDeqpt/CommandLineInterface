@@ -23,8 +23,7 @@ namespace cli
 		const std::vector<OneArgOption>&   getOneArgs()  const;
 		const std::vector<MoreArgsOption>& getMoreArgs() const;
 
-		bool parse(const char* argv[], int argc, const std::vector<Option>& presets); //with path
-		bool parse(const std::vector<std::string>& arguments, const std::vector<Option>& presets); //without path
+		bool parse(const std::vector<std::string>& arguments, const std::vector<Option>& presets);
 
 	protected:
 		std::vector<FlagOption>     m_flags;

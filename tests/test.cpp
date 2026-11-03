@@ -1,17 +1,8 @@
 #include <iostream>
 #include <CLI/Options.hpp>
 #include <CLI/Option.hpp>
+#include <CLI/Tools.hpp>
 
-std::vector<std::string> convert(const char* argv[], int argc)
-{
-	std::vector<std::string> args;
-	args.reserve(argc - 1);
-
-	for (unsigned int i = 1; i < argc; i++)
-		args.push_back(argv[i]);
-
-	return std::move(args);
-}
 
 int main()
 {
@@ -38,9 +29,7 @@ int main()
 	};
 
 	cli::Options opt;
-
-	std::cout << "Argc" << std::endl;
-	std::cout << "Success: " << opt.parse(argv, argc, presets) << std::endl;
+	std::cout << "Success: " << opt.parse(cli::tools::extractArguments(argv, argc), presets) << std::endl;
 
 	bool flag = opt.has(flag_option);
 	std::cout << "Flag: " << flag << std::endl;
@@ -50,25 +39,6 @@ int main()
 		std::cout << "One: " << *argument << std::endl;
 
 	auto arguments = opt.getArguments(more_option);
-	if (arguments != nullptr)
-	{
-		std::cout << "More:" << std::endl;
-		for (const auto& str : *arguments)
-			std::cout << "\t" << str << std::endl;
-	}
-
-	std::cout << "Vector" << std::endl;
-	auto args = convert(argv, argc);
-	std::cout << "Success: " << opt.parse(args, presets) << std::endl;
-
-	flag = opt.has(flag_option);
-	std::cout << "Flag: " << flag << std::endl;
-
-	argument = opt.getArgument(one_option);
-	if (argument != nullptr)
-		std::cout << "One: " << *argument << std::endl;
-
-	arguments = opt.getArguments(more_option);
 	if (arguments != nullptr)
 	{
 		std::cout << "More:" << std::endl;

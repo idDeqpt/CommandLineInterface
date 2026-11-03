@@ -53,17 +53,6 @@ const std::vector<Options::MoreArgsOption>& Options::getMoreArgs() const
 }
 
 
-bool Options::parse(const char* argv[], int argc, const std::vector<Option>& presets)
-{
-	std::vector<std::string> arguments;
-	arguments.reserve(argc - 1);
-
-	for (unsigned int i = 1; i < argc; i++)
-		arguments.push_back(argv[i]);
-
-	return parse(arguments, presets);
-}
-
 bool Options::parse(const std::vector<std::string>& arguments, const std::vector<Option>& presets)
 {
 	m_flags.clear();
