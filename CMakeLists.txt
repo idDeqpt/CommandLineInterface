@@ -20,7 +20,8 @@ option(BUILD_TESTS  "Build examples for library" OFF)
 option(BUILD_SHARED "Build shared library"       OFF)
 
 set(SOURCE_FILES
-    src/CommandLineOptions.cpp)
+    src/Option.cpp
+    src/Options.cpp)
 
 if(BUILD_SHARED)
 	add_library(${PROJECT_NAME} SHARED)

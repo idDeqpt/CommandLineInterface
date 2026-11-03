@@ -41,15 +41,15 @@ ___
 ```
 Пример парсинга командной строки с заданными параметрами
 ```cpp
-cli::OptionName use_tls_option('t', "tls");
-cli::OptionName port_option('p', "port");
-cli::OptionName resources_option('r', "resources");
+cli::Option::Name use_tls_option('t', "tls");
+cli::Option::Name port_option('p', "port");
+cli::Option::Name resources_option('r', "resources");
 
 cli::Options cli_options;
 bool res = cli_options.parse(argc, argv, {
-  {use_tls_option,   cli::OptionType::FLAG},
-  {port_option,      cli::OptionType::ONE_ARGUMENT},
-  {resources_option, cli::OptionType::MORE_ARGUMENT}
+  {use_tls_option,   cli::Option::Type::FLAG},
+  {port_option,      cli::Option::Type::ONE_ARGUMENT},
+  {resources_option, cli::Option::Type::MORE_ARGUMENT}
 });
 if (res == false)
 {

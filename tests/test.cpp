@@ -1,6 +1,6 @@
 #include <iostream>
-#include <CLI/CommandLineOptions.hpp>
-
+#include <CLI/Options.hpp>
+#include <CLI/Option.hpp>
 
 std::vector<std::string> convert(const char* argv[], int argc)
 {
@@ -12,7 +12,6 @@ std::vector<std::string> convert(const char* argv[], int argc)
 
 	return std::move(args);
 }
-
 
 int main()
 {
@@ -28,18 +27,20 @@ int main()
 		"option3"
 	};
 
-	cli::OptionName flag_option('f', "flag");
-	cli::OptionName one_option('o', "one");
-	cli::OptionName more_option('m', "more");
+	cli::Option::Name flag_option('f', "flag");
+	cli::Option::Name one_option('o', "one");
+	cli::Option::Name more_option('m', "more");
+
+	std::vector<cli::Option> presets = {
+		{flag_option, cli::Option::Type::FLAG},
+		{one_option,  cli::Option::Type::ONE_ARGUMENT},
+		{more_option, cli::Option::Type::MORE_ARGUMENTS}
+	};
 
 	cli::Options opt;
 
 	std::cout << "Argc" << std::endl;
-	std::cout << "Success: " << opt.parse(argv, argc, {
-		{flag_option, cli::OptionType::FLAG},
-		{one_option,  cli::OptionType::ONE_ARGUMENT},
-		{more_option, cli::OptionType::MORE_ARGUMENTS}
-	}) << std::endl;
+	std::cout << "Success: " << opt.parse(argv, argc, presets) << std::endl;
 
 	bool flag = opt.has(flag_option);
 	std::cout << "Flag: " << flag << std::endl;
@@ -58,11 +59,7 @@ int main()
 
 	std::cout << "Vector" << std::endl;
 	auto args = convert(argv, argc);
-	std::cout << "Success: " << opt.parse(args, {
-		{flag_option, cli::OptionType::FLAG},
-		{one_option,  cli::OptionType::ONE_ARGUMENT},
-		{more_option, cli::OptionType::MORE_ARGUMENTS}
-	}) << std::endl;
+	std::cout << "Success: " << opt.parse(args, presets) << std::endl;
 
 	flag = opt.has(flag_option);
 	std::cout << "Flag: " << flag << std::endl;

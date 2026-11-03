@@ -1,51 +1,14 @@
-#include <CLI/CommandLineOptions.hpp>
+#include <CLI/Options.hpp>
 
-#include <utility>
+#include <CLI/Option.hpp>
 #include <vector>
 #include <string>
 #include <map>
 
-
 namespace cli
 {
 
-OptionName::OptionName():
-	m_short_name(0) {}
-
-OptionName::OptionName(char short_name):
-	m_short_name(short_name) {}
-
-OptionName::OptionName(const std::string& long_name):
-	m_short_name(0),
-	m_long_name(long_name) {}
-
-OptionName::OptionName(char short_name, const std::string& long_name):
-	m_short_name(short_name),
-	m_long_name(long_name) {}
-
-
-char OptionName::getShortName() const
-{
-	return m_short_name;
-}
-
-const std::string& OptionName::getLongName() const
-{
-	return m_long_name;
-}
-
-
-bool OptionName::operator==(const OptionName& other) const
-{
-	return ((getShortName() == other.getShortName()) &&
-			(getLongName()  == other.getLongName()));
-
-	return false;
-}
-
-
-
-bool Options::has(const OptionName& name) const
+bool Options::has(const Option::Name& name) const
 {
 	for (unsigned int i = 0; i < m_flags.size(); i++)
 		if (m_flags[i] == name) return true;
@@ -59,14 +22,14 @@ bool Options::has(const OptionName& name) const
 	return false;
 }
 
-const std::string* Options::getArgument(const OptionName& name) const
+const std::string* Options::getArgument(const Option::Name& name) const
 {
 	for (unsigned int i = 0; i < m_one_args.size(); i++)
 		if (m_one_args[i].first == name) return &m_one_args[i].second;
 	return nullptr;
 }
 
-const std::vector<std::string>* Options::getArguments(const OptionName& name) const
+const std::vector<std::string>* Options::getArguments(const Option::Name& name) const
 {
 	for (unsigned int i = 0; i < m_more_args.size(); i++)
 		if (m_more_args[i].first == name) return &m_more_args[i].second;
@@ -90,7 +53,7 @@ const std::vector<Options::MoreArgsOption>& Options::getMoreArgs() const
 }
 
 
-bool Options::parse(const char* argv[], int argc, const std::vector<std::pair<OptionName, OptionType>>& presets)
+bool Options::parse(const char* argv[], int argc, const std::vector<Option>& presets)
 {
 	std::vector<std::string> arguments;
 	arguments.reserve(argc - 1);
@@ -101,17 +64,17 @@ bool Options::parse(const char* argv[], int argc, const std::vector<std::pair<Op
 	return parse(arguments, presets);
 }
 
-bool Options::parse(const std::vector<std::string>& arguments, const std::vector<std::pair<OptionName, OptionType>>& presets)
+bool Options::parse(const std::vector<std::string>& arguments, const std::vector<Option>& presets)
 {
 	m_flags.clear();
 	m_one_args.clear();
 	m_more_args.clear();
 
-	std::map<std::string, std::pair<OptionName, OptionType>> preset_map;
+	std::map<std::string, Option> preset_map;
 	for (const auto& p : presets)
 	{
-		const OptionName& name = p.first;
-		OptionType type = p.second;
+		const Option::Name& name = p.name;
+		Option::Type type = p.type;
 
 		if (name.getShortName() != 0)
 			preset_map[std::string(1, name.getShortName())] = {name, type};
@@ -123,7 +86,7 @@ bool Options::parse(const std::vector<std::string>& arguments, const std::vector
 	State state = State::NONE;
 	std::string token;
 	std::vector<std::string> collected_args;
-	OptionName current_option;
+	Option::Name current_option;
 
 	for (unsigned int i = 0; i < arguments.size(); i++)
 	{
@@ -163,12 +126,12 @@ bool Options::parse(const std::vector<std::string>& arguments, const std::vector
 					return false;
 
 				const auto& preset = it->second;
-				const OptionName& opt_name = preset.first;
-				OptionType        opt_type = preset.second;
+				const Option::Name& opt_name = preset.name;
+				Option::Type        opt_type = preset.type;
 
-				if (opt_type == OptionType::FLAG)
+				if (opt_type == Option::Type::FLAG)
 					m_flags.push_back(opt_name);
-				else if (opt_type == OptionType::ONE_ARGUMENT)
+				else if (opt_type == Option::Type::ONE_ARGUMENT)
 				{
 					if (!value.empty())
 						m_one_args.push_back({opt_name, value});
@@ -185,7 +148,7 @@ bool Options::parse(const std::vector<std::string>& arguments, const std::vector
 						i++;
 					}
 				}
-				else if (opt_type == OptionType::MORE_ARGUMENTS)
+				else if (opt_type == Option::Type::MORE_ARGUMENTS)
 				{
 					state = State::COLLECT_MORE;
 					current_option = opt_name;
@@ -207,12 +170,12 @@ bool Options::parse(const std::vector<std::string>& arguments, const std::vector
 						return false;
 
 					const auto& preset = it->second;
-					const OptionName& opt_name = preset.first;
-					OptionType        opt_type = preset.second;
+					const Option::Name& opt_name = preset.name;
+					Option::Type        opt_type = preset.type;
 
-					if (opt_type == OptionType::FLAG)
+					if (opt_type == Option::Type::FLAG)
 						m_flags.push_back(opt_name);
-					else if (opt_type == OptionType::ONE_ARGUMENT)
+					else if (opt_type == Option::Type::ONE_ARGUMENT)
 					{
 						if ((i + 1) >= arguments.size())
 							return false;
@@ -224,7 +187,7 @@ bool Options::parse(const std::vector<std::string>& arguments, const std::vector
 						m_one_args.push_back({opt_name, next_token});
 						i++;
 					}
-					else if (opt_type == OptionType::MORE_ARGUMENTS)
+					else if (opt_type == Option::Type::MORE_ARGUMENTS)
 					{
 						state = State::COLLECT_MORE;
 						current_option = opt_name;
@@ -241,9 +204,9 @@ bool Options::parse(const std::vector<std::string>& arguments, const std::vector
 							return false;
 
 						const auto& preset = it->second;
-						if (preset.second != OptionType::FLAG)
+						if (preset.type != Option::Type::FLAG)
 							return false;
-						m_flags.push_back(preset.first);
+						m_flags.push_back(preset.name);
 					}
 				}
 			}
