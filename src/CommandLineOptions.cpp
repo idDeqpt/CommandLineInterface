@@ -90,7 +90,18 @@ const std::vector<Options::MoreArgsOption>& Options::getMoreArgs() const
 }
 
 
-bool Options::parse(int argc, char* argv[], const std::vector<std::pair<OptionName, OptionType>>& presets)
+bool Options::parse(const char* argv[], int argc, const std::vector<std::pair<OptionName, OptionType>>& presets)
+{
+	std::vector<std::string> arguments;
+	arguments.reserve(argc - 1);
+
+	for (unsigned int i = 1; i < argc; i++)
+		arguments.push_back(argv[i]);
+
+	return parse(arguments, presets);
+}
+
+bool Options::parse(const std::vector<std::string>& arguments, const std::vector<std::pair<OptionName, OptionType>>& presets)
 {
 	m_flags.clear();
 	m_one_args.clear();
@@ -114,9 +125,9 @@ bool Options::parse(int argc, char* argv[], const std::vector<std::pair<OptionNa
 	std::vector<std::string> collected_args;
 	OptionName current_option;
 
-	for (unsigned int i = 1; i < argc; i++)
+	for (unsigned int i = 0; i < arguments.size(); i++)
 	{
-		token = argv[i];
+		token = arguments[i];
 
 		if (state == State::COLLECT_MORE)
 		{
@@ -163,10 +174,10 @@ bool Options::parse(int argc, char* argv[], const std::vector<std::pair<OptionNa
 						m_one_args.push_back({opt_name, value});
 					else
 					{
-						if ((i + 1) >= argc)
+						if ((i + 1) >= arguments.size())
 							return false;
 
-						std::string next_token = argv[i + 1];
+						std::string next_token = arguments[i + 1];
 						if (next_token[0] == '-')
 							return false;
 
@@ -203,10 +214,10 @@ bool Options::parse(int argc, char* argv[], const std::vector<std::pair<OptionNa
 						m_flags.push_back(opt_name);
 					else if (opt_type == OptionType::ONE_ARGUMENT)
 					{
-						if ((i + 1) >= argc)
+						if ((i + 1) >= arguments.size())
 							return false;
 
-						std::string next_token = argv[i + 1];
+						std::string next_token = arguments[i + 1];
 						if (next_token[0] == '-')
 							return false;
 
